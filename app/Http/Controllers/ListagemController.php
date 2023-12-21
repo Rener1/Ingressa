@@ -16,6 +16,8 @@ use Barryvdh\DomPDF\Facade as PDF;
 use App\Models\Chamada;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Sisu;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\DeclaracaoPreMatricula;
 
 class ListagemController extends Controller
 {
@@ -1106,7 +1108,20 @@ class ListagemController extends Controller
             ])->name('Enviar e-mails da listagem id: '.$listagem->id)->dispatch();
             $listagem->job_batch_id = $batch->id;
         }*/
+        if ($listagem->tipo === Listagem::TIPO_ENUM['final'] && $request->publicar)
+        {
+            $this->enviarEmailsListagemFinal($listagem);
+        }
 
         return $listagem->save();
+    }
+
+    private function enviarEmailsListagemFinal(Listagem $listagem)
+    {
+        $inscricoes = $listagem->chamada->incricoes()->where('inscricao.status', Inscricao::STATUS_ENUM['documentos_aceitos_sem_pendencias'])->with('candidato')->get(); // Colocar filtragens extras se necessário.
+
+        foreach ($inscricoes as $inscricao) {
+            Mail::to($inscricao->ds_email)->send(new DeclaracaoPreMatricula($inscricao));
+        }
     }
 }
