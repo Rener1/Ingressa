@@ -16,8 +16,7 @@ use Barryvdh\DomPDF\Facade as PDF;
 use App\Models\Chamada;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Sisu;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\DeclaracaoPreMatricula;
+use App\Jobs\EnviarDeclaracoesPreMatriculaJob;
 
 class ListagemController extends Controller
 {
@@ -1120,8 +1119,6 @@ class ListagemController extends Controller
     {
         $inscricoes = $listagem->chamada->inscricoes()->where('status', Inscricao::STATUS_ENUM['documentos_aceitos_sem_pendencias'])->with('candidato')->get(); // Colocar filtragens extras se necessário.
 
-        foreach ($inscricoes as $inscricao) {
-            Mail::to($inscricao->ds_email)->send(new DeclaracaoPreMatricula($inscricao));
-        }
+        EnviarDeclaracoesPreMatriculaJob::dispatch($inscricoes);
     }
 }
