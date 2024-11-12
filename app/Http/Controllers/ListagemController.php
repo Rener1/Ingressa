@@ -1118,7 +1118,7 @@ class ListagemController extends Controller
 
     private function enviarEmailsListagemFinal(Listagem $listagem)
     {
-        $inscricoes = $listagem->chamada->incricoes()->where('inscricao.status', Inscricao::STATUS_ENUM['documentos_aceitos_sem_pendencias'])->with('candidato')->get(); // Colocar filtragens extras se necessário.
+        $inscricoes = $listagem->chamada->inscricoes()->where('status', Inscricao::STATUS_ENUM['documentos_aceitos_sem_pendencias'])->with('candidato')->get(); // Colocar filtragens extras se necessário.
 
         foreach ($inscricoes as $inscricao) {
             Mail::to($inscricao->ds_email)->send(new DeclaracaoPreMatricula($inscricao));
