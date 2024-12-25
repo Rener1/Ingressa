@@ -1111,7 +1111,11 @@ class ListagemController extends Controller
 
     private function enviarEmailsListagemFinal(Listagem $listagem)
     {
-        $inscricoes = $listagem->chamada->inscricoes()->where('status', Inscricao::STATUS_ENUM['documentos_aceitos_sem_pendencias'])->with('candidato')->get(); // Colocar filtragens extras se necessário.
+        $inscricoes = $listagem->chamada->inscricoes()
+            ->where('status', Inscricao::STATUS_ENUM['documentos_aceitos_sem_pendencias'])
+            ->where('cd_efetivado', Inscricao::STATUS_VALIDACAO_CANDIDATO['cadastro_validado'])
+            ->with('candidato')
+            ->get();
 
         EnviarDeclaracoesPreMatriculaJob::dispatch($inscricoes);
     }
